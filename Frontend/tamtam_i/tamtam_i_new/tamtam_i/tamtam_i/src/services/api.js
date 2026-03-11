@@ -45,7 +45,7 @@ API.interceptors.response.use(
 
 export const loginUser = (data) => API.post("/api/v1/users/login", data)
 export const registerUser = (data) => API.post("/api/v1/users/register", data)
-export const fetchJobs = () => API.get("/api/v1/job/my-posted-jobs")
+export const fetchJobs = () => API.get("/api/v1/job/jobs")
 export const applyToJob = (jobId, data) =>
   API.post(`/api/v1/applications/job/${jobId}/apply`, data)
 
@@ -58,19 +58,14 @@ export const fetchActiveJobs = () => API.get("/api/v1/job/active-jobs")
 export const fetchApplicationsForJob = (jobId) =>
   API.get(`/api/v1/applications/job/${jobId}/applications`)
 
-export const selectApplicantForJob = async ({ jobId, applicationDbId, applicantId }) => {
-  return API.post(`/api/v1/job/${jobId}/applications/${applicationDbId}/select`, {
-    applicantId,
-    status: "selected",
-  })
-}
-
 export const logoutUser = async () => {
   const attempts = [
-  
+    { method: "post", url: "/api/v1/users/logout", skipAuth: false },
+    { method: "post", url: "/api/v1/users/logout", skipAuth: true },
     { method: "get", url: "/api/v1/users/logout", skipAuth: false },
     { method: "get", url: "/api/v1/users/logout", skipAuth: true },
-   
+    { method: "post", url: "/api/v1/auth/logout", skipAuth: false },
+    { method: "post", url: "/api/v1/auth/logout", skipAuth: true },
   ]
 
   let lastError

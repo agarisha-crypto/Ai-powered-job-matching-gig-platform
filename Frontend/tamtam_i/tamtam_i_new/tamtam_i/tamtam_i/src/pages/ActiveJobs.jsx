@@ -18,13 +18,9 @@ const getJobStatus = (job) =>
 
 const canApplyToJob = (job) => getJobStatus(job) === "open"
 
-const getDisplayStatus = (status) => {
+const formatStatusLabel = (status) => {
   if (!status || status === "unknown") {
     return "Unknown"
-  }
-
-  if (status === "active") {
-    return "Matched"
   }
 
   return status
@@ -206,7 +202,7 @@ function ActiveJobs() {
                   <div className="active-job-card-header">
                     <h2 className="active-job-title">{getJobTitle(job)}</h2>
                     <span className={`active-job-status ${getStatusClassName(jobStatus)}`}>
-                      {getDisplayStatus(jobStatus)}
+                      {formatStatusLabel(jobStatus)}
                     </span>
                   </div>
 
@@ -214,7 +210,7 @@ function ActiveJobs() {
 
                   <div className="active-job-meta">
                     <p>
-                      <strong>Job Status:</strong> {getDisplayStatus(jobStatus)}
+                      <strong>Job Status:</strong> {formatStatusLabel(jobStatus)}
                     </p>
                     <p>
                       <strong>Budget:</strong> {getJobBudget(job)}

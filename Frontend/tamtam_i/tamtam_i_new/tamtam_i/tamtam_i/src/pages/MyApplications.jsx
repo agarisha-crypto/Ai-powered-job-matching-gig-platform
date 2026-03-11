@@ -2,22 +2,15 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Navbar from "../components/Navbar"
-import { fetchMyApplications, logoutUser, } from "../services/api"
+import { fetchMyApplications, logoutUser } from "../services/api"
 import "./MyApplications.css"
 
-const normalizeStatus = (status) =>
-  typeof status === "string" && status.trim() ? status.trim().toLowerCase() : "unknown"
-
-const getDisplayStatus = (status) => {
-  if (!status || status === "unknown") {
-    return "Unknown"
+const normalizeStatus = (status) => {
+  const value = typeof status === "string" ? status.toLowerCase() : "unknown"
+  if (value === "open" || value === "closed" || value === "completed" || value === "cancelled") {
+    return value
   }
-
-  if (status === "active") {
-    return "Matched"
-  }
-
-  return status.charAt(0).toUpperCase() + status.slice(1)
+  return "unknown"
 }
 
 const getTitle = (application) =>
@@ -32,6 +25,11 @@ const getBudget = (application) =>
 
 const getAmountProposed = (application) =>
   application?.amountProposed ?? "Not provided"
+
+const formatStatus = (status) =>
+  status === "unknown"
+    ? "Unknown"
+    : status.charAt(0).toUpperCase() + status.slice(1)
 
 function MyApplications() {
   const navigate = useNavigate()
@@ -141,7 +139,7 @@ function MyApplications() {
                     <strong>Proposed Amount:</strong> {getAmountProposed(application)}
                   </p>
                   <p className={`application-status status-${status}`}>
-                    <strong>Status:</strong> {getDisplayStatus(status)}
+                    <strong>Status:</strong> {formatStatus(status)}
                   </p>
                 </article>
               )
