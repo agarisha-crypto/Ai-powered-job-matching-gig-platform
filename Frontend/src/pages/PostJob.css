@@ -1,7 +1,7 @@
 .post-job-page {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #f3f7fe;
 }
 
 .post-job-main {
@@ -14,72 +14,96 @@
 .post-job-content {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.1), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.09), transparent 40%),
+    #f3f7fe;
 }
 
 .post-job-card {
   width: 100%;
-  max-width: 640px;
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 16px;
-  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.2);
-  padding: 1.5rem;
+  max-width: 720px;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 22px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  padding: clamp(1rem, 2.5vw, 2rem);
 }
 
-.post-job-card h1 {
-  margin: 0 0 0.3rem;
-  color: #1f2937;
+.post-job-header {
+  margin-bottom: 1.15rem;
 }
 
-.post-job-card p {
-  margin: 0 0 1.2rem;
-  color: #4b5563;
+.post-job-header h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.62rem, 2.5vw, 2.1rem);
+  letter-spacing: -0.02em;
+}
+
+.post-job-header p {
+  margin: 0.48rem 0 0;
+  color: #64748b;
 }
 
 .post-job-form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 1rem;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  display: grid;
+  gap: 0.48rem;
 }
 
 .form-group label {
   font-weight: 600;
-  color: #1f2937;
+  color: #334155;
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group textarea {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 0.7rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.76rem 0.88rem;
   font-size: 0.95rem;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group textarea {
+  min-height: 132px;
+  resize: vertical;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.17);
 }
 
 .post-job-button {
   margin-top: 0.2rem;
   border: none;
-  border-radius: 8px;
-  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  padding: 0.82rem 1rem;
   font-weight: 700;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   cursor: pointer;
   color: #fff;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: linear-gradient(135deg, #2563eb, #0891b2);
+  box-shadow: 0 9px 18px rgba(37, 99, 235, 0.23);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-job-button:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.27);
 }
 
 .post-job-button:disabled {
@@ -89,30 +113,26 @@
 
 .post-job-message,
 .post-job-error {
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 0.65rem 0.8rem;
   margin-bottom: 0.9rem;
+  border: 1px solid transparent;
 }
 
 .post-job-message {
   color: #065f46;
   background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  border-color: #a7f3d0;
 }
 
 .post-job-error {
   color: #991b1b;
   background: #fef2f2;
-  border: 1px solid #fecaca;
+  border-color: #fecaca;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .post-job-content {
     padding: 1rem;
-    align-items: flex-start;
-  }
-
-  .post-job-card {
-    margin-top: 1rem;
   }
 }

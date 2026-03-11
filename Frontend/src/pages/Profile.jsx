@@ -203,13 +203,14 @@ function Profile() {
         <div className="profile-content">
           <div className="profile-header">
             <h1>My Profile</h1>
+            <p>Manage your account details, skills, and password.</p>
           </div>
 
           {message && <div className="profile-message">{message}</div>}
-          {error && <div className="profile-message">{error}</div>}
+          {error && <div className="profile-error-message">{error}</div>}
 
           <div className="profile-card">
-            <div className="profile-picture-section">
+            <aside className="profile-picture-section">
               <div className="profile-picture-wrapper">
                 {user.profilePicture ? (
                   <img
@@ -227,32 +228,36 @@ function Profile() {
                   </div>
                 )}
               </div>
-            </div>
+              <div className="profile-picture-meta">
+                <h2>{user.fullName || "Not set"}</h2>
+                <p>@{user.username || "Not set"}</p>
+              </div>
+            </aside>
 
             <div className="profile-form">
               <div className="profile-info">
                 <div className="info-group">
-                  <span className="label">Name:</span>
+                  <span className="label">Name</span>
                   <span className="value">{user.fullName || "Not set"}</span>
                 </div>
 
                 <div className="info-group">
-                  <span className="label">Username:</span>
+                  <span className="label">Username</span>
                   <span className="value">@{user.username || "Not set"}</span>
                 </div>
 
                 <div className="info-group">
-                  <span className="label">Email:</span>
+                  <span className="label">Email</span>
                   <span className="value">{user.email || "Not set"}</span>
                 </div>
 
                 <div className="info-group">
-                  <span className="label">Phone:</span>
+                  <span className="label">Phone</span>
                   <span className="value">{user.phoneNumber || "Not set"}</span>
                 </div>
 
-                <div className="info-group">
-                  <span className="label">Skills:</span>
+                <div className="info-group skills-info-group">
+                  <span className="label">Skills</span>
                   {displaySkills.length > 0 ? (
                     <div className="skills-display">
                       {displaySkills.map((skill, idx) => (
@@ -266,32 +271,34 @@ function Profile() {
                   )}
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="new-skill">Add Skill</label>
-                  <input
-                    id="new-skill"
-                    type="text"
-                    value={newSkill}
-                    onChange={(event) => setNewSkill(event.target.value)}
-                    className="form-input"
-                    placeholder="e.g., React"
-                    disabled={saving}
-                  />
-                </div>
+                <div className="add-skill-panel">
+                  <div className="form-group">
+                    <label htmlFor="new-skill">Add Skill</label>
+                    <input
+                      id="new-skill"
+                      type="text"
+                      value={newSkill}
+                      onChange={(event) => setNewSkill(event.target.value)}
+                      className="form-input"
+                      placeholder="e.g., React"
+                      disabled={saving}
+                    />
+                  </div>
 
-                <div className="form-actions">
-                  <button
-                    className="save-button"
-                    type="button"
-                    onClick={handleAddSkill}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Add Skill"}
-                  </button>
+                  <div className="form-actions">
+                    <button
+                      className="save-button"
+                      type="button"
+                      onClick={handleAddSkill}
+                      disabled={saving}
+                    >
+                      {saving ? "Saving..." : "Add Skill"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="info-group">
-                  <span className="label">Profile Updates:</span>
+                  <span className="label">Profile Updates</span>
                   <span className="value description">
                     The current backend supports viewing your profile and adding skills only.
                   </span>

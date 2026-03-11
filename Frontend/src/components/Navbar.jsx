@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import tamtamLogo from "../assets/tamtam-logo.jpeg"
 import "./Navbar.css"
 
 function Navbar({ user, onLogout }) {
@@ -18,15 +19,22 @@ function Navbar({ user, onLogout }) {
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <input
-          type="text"
-          className="navbar-search"
-          placeholder="Search..."
-        />
+        <div className="navbar-brand">
+          <img src={tamtamLogo} alt="TAMTAM logo" className="navbar-brand-logo" />
+          <span className="navbar-brand-text">TAMTAM</span>
+        </div>
+        <label className="navbar-search-wrap">
+          <span className="navbar-search-icon">{"\u2315"}</span>
+          <input
+            type="text"
+            className="navbar-search"
+            placeholder="Search jobs, applications, and more..."
+          />
+        </label>
       </div>
       <div className="navbar-right">
         <button className="navbar-icon-btn" title="Notifications">
-          🔔
+          {"\u{1F514}"}
         </button>
         <div className="navbar-profile" ref={dropdownRef}>
           <button
@@ -34,9 +42,9 @@ function Navbar({ user, onLogout }) {
             onClick={() => setShowDropdown((v) => !v)}
             title="Profile Menu"
           >
-            <span className="profile-avatar">👤</span>
+            <span className="profile-avatar">{"\u{1F464}"}</span>
             <span className="profile-name">{user?.username || "User"}</span>
-            <span className="dropdown-arrow">⌄</span>
+            <span className="dropdown-arrow">{"\u2304"}</span>
           </button>
           {showDropdown && (
             <div className="navbar-dropdown">
@@ -48,23 +56,23 @@ function Navbar({ user, onLogout }) {
               </div>
               <div className="dropdown-divider"></div>
               <a href="/my-profile" className="dropdown-item">
-                👤 My Profile
+                My Profile
               </a>
               <a href="/ratings-reviews" className="dropdown-item">
-                ⭐ Ratings & Reviews
+                Ratings & Reviews
               </a>
               <a href="/wallet" className="dropdown-item">
-                💳 Wallet
+                Wallet
               </a>
               <a href="/my-activity" className="dropdown-item">
-                📊 My Activity
+                My Activity
               </a>
               <a href="/account-settings" className="dropdown-item">
-                ⚙️ Account Settings
+                Account Settings
               </a>
               <div className="dropdown-divider"></div>
               <button className="dropdown-item logout-item" onClick={onLogout}>
-                🚪 Logout
+                Logout
               </button>
             </div>
           )}

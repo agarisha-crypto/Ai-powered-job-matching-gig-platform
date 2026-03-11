@@ -1,7 +1,7 @@
 .active-jobs-page {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #f3f7fe;
 }
 
 .active-jobs-main {
@@ -12,65 +12,75 @@
 }
 
 .active-jobs-content {
-  padding: 32px;
+  padding: clamp(1rem, 2vw, 2rem);
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.1), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.08), transparent 42%),
+    #f3f7fe;
 }
 
 .active-jobs-header {
-  margin-bottom: 24px;
+  margin-bottom: 1.2rem;
 }
 
 .active-jobs-header h1 {
-  margin: 0 0 8px;
+  margin: 0;
   color: #0f172a;
-  font-size: 2rem;
+  font-size: clamp(1.72rem, 2.8vw, 2.3rem);
 }
 
 .active-jobs-header p {
-  margin: 0;
-  color: #475569;
+  margin: 0.45rem 0 0;
+  color: #64748b;
 }
 
 .active-jobs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 1rem;
 }
 
 .active-job-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+  padding: 1rem;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
 }
 
 .active-job-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 14px;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .active-job-title {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #0f172a;
+  line-height: 1.35;
 }
 
 .active-job-status {
-  background: #dcfce7;
-  color: #166534;
   border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 700;
   white-space: nowrap;
+  background: #e2e8f0;
+  color: #334155;
 }
 
 .active-job-status.status-open {
   background: #dcfce7;
   color: #166534;
+}
+
+.active-job-status.status-matched {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .active-job-status.status-inprogress,
@@ -90,38 +100,49 @@
 }
 
 .active-job-description {
-  margin: 0 0 18px;
-  color: #334155;
-  line-height: 1.6;
+  margin: 0;
+  color: #475569;
+  line-height: 1.55;
+  font-size: 0.92rem;
 }
 
-.active-job-meta p {
-  margin: 0 0 10px;
-  color: #1e293b;
+.active-job-meta-grid {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
 }
 
-.active-job-apply-button {
-  margin-top: 10px;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-weight: 600;
-  cursor: pointer;
-  background: linear-gradient(135deg, #4facfe, #00c6ff);
-  color: #ffffff;
+.active-meta-item {
+  border: 1px solid #e2e8f0;
+  background: #f8fbff;
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  display: grid;
+  gap: 0.2rem;
 }
 
-.active-job-apply-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.meta-label {
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.meta-value {
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .active-jobs-error,
 .active-jobs-message,
 .active-jobs-empty {
-  margin-bottom: 20px;
-  padding: 16px 18px;
-  border-radius: 14px;
+  margin-bottom: 1rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
   font-weight: 500;
 }
 
@@ -150,8 +171,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: #f8fafc;
+  gap: 0.75rem;
+  background: #f3f7fe;
   color: #334155;
 }
 
@@ -170,13 +191,17 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .active-jobs-content {
-    padding: 20px;
+    padding: 1rem;
   }
 
-  .active-jobs-header h1 {
-    font-size: 1.6rem;
+  .active-jobs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .active-job-meta-grid {
+    grid-template-columns: 1fr;
   }
 
   .active-job-card-header {

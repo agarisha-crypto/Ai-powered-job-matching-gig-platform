@@ -130,19 +130,25 @@ function MyApplications() {
                   className="application-card"
                   key={application?._id || application?.id || `${getTitle(application)}-${status}`}
                 >
-                  <h2 className="application-job-title">{getTitle(application)}</h2>
-                  <p className="application-client">
-                    <strong>Description:</strong> {getDescription(application)}
-                  </p>
-                  <p className="application-client">
-                    <strong>Budget:</strong> {getBudget(application)}
-                  </p>
-                  <p className="application-client">
-                    <strong>Proposed Amount:</strong> {getAmountProposed(application)}
-                  </p>
-                  <p className={`application-status status-${status}`}>
-                    <strong>Status:</strong> {formatStatus(status)}
-                  </p>
+                  <div className="application-card-header">
+                    <h2 className="application-job-title">{getTitle(application)}</h2>
+                    <span className={`application-status-badge status-${status}`}>
+                      {formatStatus(status)}
+                    </span>
+                  </div>
+
+                  <p className="application-description">{getDescription(application)}</p>
+
+                  <div className="application-metrics">
+                    <div className="application-metric-card">
+                      <span className="metric-label">Budget</span>
+                      <span className="metric-value">{getBudget(application)}</span>
+                    </div>
+                    <div className="application-metric-card">
+                      <span className="metric-label">Proposed</span>
+                      <span className="metric-value">{getAmountProposed(application)}</span>
+                    </div>
+                  </div>
                 </article>
               )
             })}

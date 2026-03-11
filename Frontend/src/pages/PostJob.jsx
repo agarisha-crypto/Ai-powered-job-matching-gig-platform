@@ -90,8 +90,10 @@ function PostJob() {
         <Navbar user={user} onLogout={handleLogout} />
         <div className="post-job-content">
           <div className="post-job-card">
-            <h1>Post Job</h1>
-            <p>Create a new job for freelancers in TAMTAM.</p>
+            <div className="post-job-header">
+              <h1>Post Job</h1>
+              <p>Create a new job for freelancers in TAMTAM.</p>
+            </div>
 
             {message && <div className="post-job-message">{message}</div>}
             {error && <div className="post-job-error">{error}</div>}

@@ -164,19 +164,23 @@ function ActiveJobs() {
 
                   <p className="active-job-description">{getJobDescription(application)}</p>
 
-                  <div className="active-job-meta">
-                    <p>
-                      <strong>Job Status:</strong> {formatStatusLabel(jobStatus)}
-                    </p>
-                    <p>
-                      <strong>Budget:</strong> {getJobBudget(application)}
-                    </p>
-                    <p>
-                      <strong>Your Proposed Amount:</strong> {application?.amountProposed ?? "Not provided"}
-                    </p>
-                    <p>
-                      <strong>Applied On:</strong> {getCreatedDate(application)}
-                    </p>
+                  <div className="active-job-meta-grid">
+                    <div className="active-meta-item">
+                      <span className="meta-label">Budget</span>
+                      <span className="meta-value">{getJobBudget(application)}</span>
+                    </div>
+                    <div className="active-meta-item">
+                      <span className="meta-label">Your Proposed Amount</span>
+                      <span className="meta-value">{application?.amountProposed ?? "Not provided"}</span>
+                    </div>
+                    <div className="active-meta-item">
+                      <span className="meta-label">Applied On</span>
+                      <span className="meta-value">{getCreatedDate(application)}</span>
+                    </div>
+                    <div className="active-meta-item">
+                      <span className="meta-label">Job Status</span>
+                      <span className="meta-value">{formatStatusLabel(jobStatus)}</span>
+                    </div>
                   </div>
                 </article>
               )

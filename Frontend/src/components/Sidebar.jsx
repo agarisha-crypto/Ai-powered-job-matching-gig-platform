@@ -21,39 +21,41 @@ function Sidebar({ user }) {
               <div className="sidebar-avatar default">{user.fullName?.charAt(0).toUpperCase() || "U"}</div>
             )}
             <span className="sidebar-username">{user.username}</span>
+            <span className="sidebar-role">Welcome back</span>
           </>
         )}
       </div>
       <nav className="sidebar-nav">
-        <NavLink to="/dashboard" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          Dashboard
+        <p className="sidebar-nav-title">Main Menu</p>
+        <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">Dashboard</span>
         </NavLink>
-        <NavLink to="/my-profile" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          👤 My Profile
+        <NavLink to="/my-profile" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">My Profile</span>
         </NavLink>
-        <NavLink to="/jobs-marketplace" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          Jobs Marketplace
+        <NavLink to="/jobs-marketplace" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">Jobs Marketplace</span>
         </NavLink>
-        <NavLink to="/post-jobs" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          Post Jobs
+        <NavLink to="/post-jobs" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">Post Jobs</span>
         </NavLink>
-        <NavLink to="/my-jobs" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          My Jobs
+        <NavLink to="/my-jobs" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">My Jobs</span>
         </NavLink>
-        <NavLink to="/my-applications" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          My Applications
+        <NavLink to="/my-applications" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">My Applications</span>
         </NavLink>
-        <NavLink to="/active-jobs" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          Active Jobs
+        <NavLink to="/active-jobs" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">Active Jobs</span>
         </NavLink>
-        <NavLink to="/wallet" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          Wallet
+        <NavLink to="/wallet" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">Wallet</span>
         </NavLink>
-        <NavLink to="/ai-assistant" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          AI Assistant
+        <NavLink to="/ai-assistant" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">AI Assistant</span>
         </NavLink>
-        <NavLink to="/settings" className={({isActive})=>isActive?"sidebar-link active":"sidebar-link"}>
-          Settings
+        <NavLink to="/settings" className={({ isActive }) => (isActive ? "sidebar-link active" : "sidebar-link")}>
+          <span className="sidebar-link-text">Settings</span>
         </NavLink>
       </nav>
     </div>

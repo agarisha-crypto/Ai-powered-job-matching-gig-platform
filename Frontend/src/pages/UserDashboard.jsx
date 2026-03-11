@@ -81,10 +81,14 @@ function UserDashboard() {
         <Navbar user={user} onLogout={handleLogout} />
         <div className="dashboard-content">
           <div className="dashboard-welcome">
+            <p className="dashboard-eyebrow">Dashboard</p>
             <h1 className="dashboard-title">
               Welcome to <span className="dashboard-title-brand">TAMTAM</span>
             </h1>
             <p className="dashboard-subtitle">Your Job Saarthi</p>
+            <p className="dashboard-description">
+              Track opportunities, manage your applications, and keep your profile updated from one place.
+            </p>
             <h2 className="dashboard-question">What do you want to do today?</h2>
           </div>
         </div>

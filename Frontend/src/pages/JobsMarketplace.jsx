@@ -156,7 +156,11 @@ function JobsMarketplace() {
 
               return (
                 <article className="job-card" key={jobId || `${job.title}-${job.budget}`}>
-                  <h2 className="job-title">{job.title || "Untitled Job"}</h2>
+                  <div className="job-card-header">
+                    <h2 className="job-title">{job.title || "Untitled Job"}</h2>
+                    <span className="job-budget-chip">{job.budget ?? "Not specified"}</span>
+                  </div>
+
                   <p className="job-description">{job.description || "No description available."}</p>
 
                   <div className="job-hirer">
@@ -179,12 +183,7 @@ function JobsMarketplace() {
                     </div>
                   </div>
 
-                  <p className="job-budget">
-                    <strong>Budget:</strong> {job.budget ?? "Not specified"}
-                  </p>
-
                   <div className="job-skills">
-                    <strong>Required Skills:</strong>
                     {requiredSkills.length > 0 ? (
                       <div className="job-skill-tags">
                         {requiredSkills.map((skill, index) => (
@@ -194,7 +193,7 @@ function JobsMarketplace() {
                         ))}
                       </div>
                     ) : (
-                      <span className="no-skills"> Not specified</span>
+                      <span className="no-skills">No skills specified</span>
                     )}
                   </div>
 
@@ -203,7 +202,7 @@ function JobsMarketplace() {
                     onClick={() => setSelectedJob(job)}
                     disabled={isApplying || !canApply}
                   >
-                    {isApplying ? "Applying..." : canApply ? "Apply" : "Unavailable"}
+                    {isApplying ? "Applying..." : canApply ? "Apply Now" : "Unavailable"}
                   </button>
                 </article>
               )

@@ -224,23 +224,30 @@ function MyJobs() {
               const applicants = applicantsState.items
               const isExpanded = expandedJobId === jobId
               const isJobOpen = job?.status === "open"
+              const jobStatus = (job?.status || "unknown").toLowerCase()
 
               return (
                 <article className="my-job-card" key={jobId || job.title}>
-                  <h2 className="my-job-title">{job.title || "Untitled Job"}</h2>
+                  <div className="my-job-header">
+                    <h2 className="my-job-title">{job.title || "Untitled Job"}</h2>
+                    <span className={`my-job-status status-${jobStatus}`}>
+                      {job.status || "Unknown"}
+                    </span>
+                  </div>
+
                   <p className="my-job-description">{job.description || "No description available."}</p>
-                  <p className="my-job-detail">
-                    <strong>Budget:</strong> {job.budget ?? "Not specified"}
-                  </p>
-                  <p className="my-job-detail">
-                    <strong>Required Skills:</strong> {normalizeSkills(job.requiredSkills)}
-                  </p>
-                  <p className="my-job-detail">
-                    <strong>Job Status:</strong> {job.status || "Unknown"}
-                  </p>
-                  <p className="my-job-detail">
-                    <strong>Number of Applicants:</strong> {applicants.length}
-                  </p>
+
+                  <div className="my-job-details-grid">
+                    <p className="my-job-detail">
+                      <strong>Budget:</strong> {job.budget ?? "Not specified"}
+                    </p>
+                    <p className="my-job-detail">
+                      <strong>Required Skills:</strong> {normalizeSkills(job.requiredSkills)}
+                    </p>
+                    <p className="my-job-detail">
+                      <strong>Applicants:</strong> {applicants.length}
+                    </p>
+                  </div>
 
                   <button
                     className="my-job-applicants-button"
