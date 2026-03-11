@@ -25,6 +25,11 @@ const normalizeSkills = (skills) => {
 
 const getJobId = (job) => job?._id || job?.id || job?.jobId || ""
 const canApplyToJob = (job) => (job?.status || "open") === "open"
+const getHirerName = (job) =>
+  job?.createdBy?.fullName || job?.createdBy?.username || "Unknown Hirer"
+const getHirerUsername = (job) =>
+  job?.createdBy?.username ? `@${job.createdBy.username}` : ""
+const getHirerProfilePicture = (job) => job?.createdBy?.profilePicture || ""
 
 function JobsMarketplace() {
   const navigate = useNavigate()
@@ -153,6 +158,26 @@ function JobsMarketplace() {
                 <article className="job-card" key={jobId || `${job.title}-${job.budget}`}>
                   <h2 className="job-title">{job.title || "Untitled Job"}</h2>
                   <p className="job-description">{job.description || "No description available."}</p>
+
+                  <div className="job-hirer">
+                    {getHirerProfilePicture(job) ? (
+                      <img
+                        src={getHirerProfilePicture(job)}
+                        alt={getHirerName(job)}
+                        className="job-hirer-image"
+                      />
+                    ) : (
+                      <div className="job-hirer-fallback">
+                        {getHirerName(job).charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="job-hirer-meta">
+                      <span className="job-hirer-name">{getHirerName(job)}</span>
+                      {getHirerUsername(job) && (
+                        <span className="job-hirer-username">{getHirerUsername(job)}</span>
+                      )}
+                    </div>
+                  </div>
 
                   <p className="job-budget">
                     <strong>Budget:</strong> {job.budget ?? "Not specified"}

@@ -102,6 +102,7 @@
 }
 
 .my-jobs-error,
+.my-jobs-success,
 .my-jobs-empty,
 .my-job-applicants-error,
 .my-job-applicants-empty {
@@ -116,11 +117,107 @@
   border: 1px solid #fecaca;
 }
 
+.my-jobs-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  margin-bottom: 16px;
+}
+
 .my-jobs-empty,
 .my-job-applicants-empty {
   background: #ffffff;
   border: 1px dashed #cbd5e1;
   color: #475569;
+}
+
+.my-job-applicant-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.my-job-applicant-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-job-applicant-image,
+.my-job-applicant-fallback {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.my-job-applicant-image {
+  object-fit: cover;
+}
+
+.my-job-applicant-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.my-job-applicant-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.my-job-select-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #0f172a;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.my-job-select-button:disabled {
+  cursor: not-allowed;
+  background: #94a3b8;
+}
+
+.my-job-applicant-username,
+.my-job-applicant-date {
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.my-job-applicant-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.my-job-applicant-skill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.my-job-matched-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #334155;
+  white-space: nowrap;
 }
 
 .my-jobs-loading {
@@ -156,5 +253,9 @@
 
   .my-job-applicant-item {
     flex-direction: column;
+  }
+
+  .my-job-select-button {
+    width: 100%;
   }
 }

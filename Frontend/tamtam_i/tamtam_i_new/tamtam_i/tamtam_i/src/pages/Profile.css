@@ -255,6 +255,18 @@
   font-weight: 500;
 }
 
+.password-section {
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.password-section-title {
+  margin: 0 0 1rem;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
 /* Form Actions */
 .form-actions {
   display: flex;

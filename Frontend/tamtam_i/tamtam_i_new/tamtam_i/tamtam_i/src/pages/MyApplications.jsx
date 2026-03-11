@@ -7,7 +7,7 @@ import "./MyApplications.css"
 
 const normalizeStatus = (status) => {
   const value = typeof status === "string" ? status.toLowerCase() : "unknown"
-  if (value === "open" || value === "closed" || value === "completed" || value === "cancelled") {
+  if (value === "open" || value === "matched" || value === "done") {
     return value
   }
   return "unknown"
@@ -29,7 +29,9 @@ const getAmountProposed = (application) =>
 const formatStatus = (status) =>
   status === "unknown"
     ? "Unknown"
-    : status.charAt(0).toUpperCase() + status.slice(1)
+    : status === "done"
+      ? "Done"
+      : status.charAt(0).toUpperCase() + status.slice(1)
 
 function MyApplications() {
   const navigate = useNavigate()
@@ -122,7 +124,7 @@ function MyApplications() {
 
           <div className="applications-grid">
             {applications.map((application) => {
-              const status = normalizeStatus(application?.status)
+              const status = normalizeStatus(application?.jobId?.status)
               return (
                 <article
                   className="application-card"

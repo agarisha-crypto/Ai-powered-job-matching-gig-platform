@@ -1,19 +1,9 @@
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Navbar from "../components/Navbar"
-import { logoutUser } from "../services/api"
+import { addUserSkill, changeUserPassword, fetchCurrentUser, logoutUser } from "../services/api"
 import "./Profile.css"
-
-const normalizeSkillsForInput = (skills) => {
-  if (Array.isArray(skills)) {
-    return skills.join(", ")
-  }
-  if (typeof skills === "string") {
-    return skills
-  }
-  return ""
-}
 
 const normalizeSkillsForDisplay = (skills) => {
   if (Array.isArray(skills)) {
@@ -21,33 +11,30 @@ const normalizeSkillsForDisplay = (skills) => {
       .map((skill) => (typeof skill === "string" ? skill.trim() : ""))
       .filter(Boolean)
   }
+
   if (typeof skills === "string") {
     return skills
       .split(",")
       .map((skill) => skill.trim())
       .filter(Boolean)
   }
+
   return []
 }
 
 function Profile() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
-  const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
   const [message, setMessage] = useState("")
-
-  const [formData, setFormData] = useState({
-    fullName: "",
-    username: "",
-    email: "",
-    phoneNumber: "",
-    skills: "",
-    education: "",
-    profileSummary: "",
-    rating: 0,
-    profilePicture: null,
+  const [error, setError] = useState("")
+  const [newSkill, setNewSkill] = useState("")
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   })
 
   useEffect(() => {
@@ -59,81 +46,124 @@ function Profile() {
       return
     }
 
-    try {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-        setFormData({
-          fullName: parsedUser.fullName || "",
-          username: parsedUser.username || "",
-          email: parsedUser.email || "",
-          phoneNumber: parsedUser.phoneNumber || "",
-          skills: normalizeSkillsForInput(parsedUser.skills),
-          education: parsedUser.education || "",
-          profileSummary: parsedUser.profileSummary || "",
-          rating: parsedUser.rating || 0,
-        profilePicture: null,
-      })
-      setLoading(false)
-    } catch (error) {
-      console.error("Error loading profile:", error)
-      navigate("/login")
+    const loadProfile = async () => {
+      setLoading(true)
+      setError("")
+
+      try {
+        const response = await fetchCurrentUser()
+        const currentUser = response.data?.data
+
+        if (!currentUser) {
+          throw new Error("Current user payload missing")
+        }
+
+        localStorage.setItem("user", JSON.stringify(currentUser))
+        setUser(currentUser)
+      } catch (loadError) {
+        console.error("Error loading profile:", loadError)
+
+        try {
+          const parsedUser = JSON.parse(userData)
+          setUser(parsedUser)
+          setError("Showing cached profile data. Backend profile refresh failed.")
+        } catch (parseError) {
+          console.error("Error parsing cached profile:", parseError)
+          localStorage.removeItem("token")
+          localStorage.removeItem("user")
+          navigate("/login")
+          return
+        }
+      } finally {
+        setLoading(false)
+      }
     }
+
+    loadProfile()
   }, [navigate])
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
+  const handleAddSkill = async () => {
+    const trimmedSkill = newSkill.trim()
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        profilePicture: file,
-      }))
+    if (!trimmedSkill) {
+      setMessage("Enter a skill before saving.")
+      return
     }
-  }
 
-  const handleSaveProfile = async () => {
     setSaving(true)
     setMessage("")
+    setError("")
 
     try {
-      // In a real app, you would send this to the backend API
-      // For now, we'll update local storage and show a success message
-      
+      const response = await addUserSkill(trimmedSkill)
+      const updatedSkills = Array.isArray(response.data?.skills) ? response.data.skills : []
       const updatedUser = {
         ...user,
-        fullName: formData.fullName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        skills: formData.skills,
-        education: formData.education,
-        profileSummary: formData.profileSummary,
+        skills: updatedSkills,
       }
 
       localStorage.setItem("user", JSON.stringify(updatedUser))
       setUser(updatedUser)
-      setIsEditing(false)
-      setMessage("Profile updated successfully!")
-      setTimeout(() => setMessage(""), 3000)
-    } catch (error) {
-      console.error("Error saving profile:", error)
-      setMessage("Failed to update profile. Please try again.")
+      setNewSkill("")
+      setMessage("Skill added successfully.")
+    } catch (saveError) {
+      console.error("Error adding skill:", saveError)
+      setError(saveError.response?.data?.message || "Failed to add skill.")
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handlePasswordInputChange = (event) => {
+    const { name, value } = event.target
+    setPasswordForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }))
+  }
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault()
+    setMessage("")
+    setError("")
+
+    if (
+      !passwordForm.currentPassword ||
+      !passwordForm.newPassword ||
+      !passwordForm.confirmPassword
+    ) {
+      setError("All password fields are required.")
+      return
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError("New password and confirm password do not match.")
+      return
+    }
+
+    setChangingPassword(true)
+
+    try {
+      const response = await changeUserPassword(passwordForm)
+      setMessage(response.data?.message || "Password changed successfully.")
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      })
+    } catch (changeError) {
+      console.error("Error changing password:", changeError)
+      setError(changeError.response?.data?.message || "Failed to change password.")
+    } finally {
+      setChangingPassword(false)
     }
   }
 
   const handleLogout = async () => {
     try {
       await logoutUser()
-    } catch (err) {
-      console.warn("Backend logout failed", err)
+    } catch (logoutError) {
+      console.warn("Backend logout failed", logoutError)
     }
 
     localStorage.removeItem("token")
@@ -173,20 +203,12 @@ function Profile() {
         <div className="profile-content">
           <div className="profile-header">
             <h1>My Profile</h1>
-            {!isEditing && (
-              <button
-                className="edit-button"
-                onClick={() => setIsEditing(true)}
-              >
-                ✏️ Edit Profile
-              </button>
-            )}
           </div>
 
           {message && <div className="profile-message">{message}</div>}
+          {error && <div className="profile-message">{error}</div>}
 
           <div className="profile-card">
-            {/* Profile Picture Section */}
             <div className="profile-picture-section">
               <div className="profile-picture-wrapper">
                 {user.profilePicture ? (
@@ -205,180 +227,132 @@ function Profile() {
                   </div>
                 )}
               </div>
-              {isEditing && (
-                <div className="picture-upload">
-                  <input
-                    id="picture-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="file-input"
-                  />
-                  <label htmlFor="picture-input">Change Picture</label>
-                </div>
-              )}
             </div>
 
-            {/* Profile Form */}
             <div className="profile-form">
-              {isEditing ? (
-                <>
+              <div className="profile-info">
+                <div className="info-group">
+                  <span className="label">Name:</span>
+                  <span className="value">{user.fullName || "Not set"}</span>
+                </div>
+
+                <div className="info-group">
+                  <span className="label">Username:</span>
+                  <span className="value">@{user.username || "Not set"}</span>
+                </div>
+
+                <div className="info-group">
+                  <span className="label">Email:</span>
+                  <span className="value">{user.email || "Not set"}</span>
+                </div>
+
+                <div className="info-group">
+                  <span className="label">Phone:</span>
+                  <span className="value">{user.phoneNumber || "Not set"}</span>
+                </div>
+
+                <div className="info-group">
+                  <span className="label">Skills:</span>
+                  {displaySkills.length > 0 ? (
+                    <div className="skills-display">
+                      {displaySkills.map((skill, idx) => (
+                        <span key={`${skill}-${idx}`} className="skill-tag">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="value">No skills added yet</span>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="new-skill">Add Skill</label>
+                  <input
+                    id="new-skill"
+                    type="text"
+                    value={newSkill}
+                    onChange={(event) => setNewSkill(event.target.value)}
+                    className="form-input"
+                    placeholder="e.g., React"
+                    disabled={saving}
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    className="save-button"
+                    type="button"
+                    onClick={handleAddSkill}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Add Skill"}
+                  </button>
+                </div>
+
+                <div className="info-group">
+                  <span className="label">Profile Updates:</span>
+                  <span className="value description">
+                    The current backend supports viewing your profile and adding skills only.
+                  </span>
+                </div>
+
+                <form className="password-section" onSubmit={handleChangePassword}>
+                  <h2 className="password-section-title">Change Password</h2>
+
                   <div className="form-group">
-                    <label>Full Name</label>
+                    <label htmlFor="currentPassword">Current Password</label>
                     <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
+                      id="currentPassword"
+                      name="currentPassword"
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={handlePasswordInputChange}
                       className="form-input"
+                      autoComplete="current-password"
+                      disabled={changingPassword}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Username</label>
+                    <label htmlFor="newPassword">New Password</label>
                     <input
-                      type="text"
-                      name="username"
-                      value={formData.username}
-                      disabled
-                      className="form-input disabled"
-                    />
-                    <small>Username cannot be changed</small>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
+                      id="newPassword"
+                      name="newPassword"
+                      type="password"
+                      value={passwordForm.newPassword}
+                      onChange={handlePasswordInputChange}
                       className="form-input"
+                      autoComplete="new-password"
+                      disabled={changingPassword}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Phone Number</label>
+                    <label htmlFor="confirmPassword">Confirm New Password</label>
                     <input
-                      type="text"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      value={passwordForm.confirmPassword}
+                      onChange={handlePasswordInputChange}
                       className="form-input"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Skills (comma-separated)</label>
-                    <textarea
-                      name="skills"
-                      value={formData.skills}
-                      onChange={handleInputChange}
-                      className="form-textarea"
-                      placeholder="e.g., Python, React, Node.js"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Education</label>
-                    <textarea
-                      name="education"
-                      value={formData.education}
-                      onChange={handleInputChange}
-                      className="form-textarea"
-                      placeholder="e.g., Bachelor's in Computer Science"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Profile Summary</label>
-                    <textarea
-                      name="profileSummary"
-                      value={formData.profileSummary}
-                      onChange={handleInputChange}
-                      className="form-textarea"
-                      placeholder="Tell us about yourself..."
+                      autoComplete="new-password"
+                      disabled={changingPassword}
                     />
                   </div>
 
                   <div className="form-actions">
                     <button
                       className="save-button"
-                      onClick={handleSaveProfile}
-                      disabled={saving}
+                      type="submit"
+                      disabled={changingPassword}
                     >
-                      {saving ? "Saving..." : "Save Changes"}
-                    </button>
-                    <button
-                      className="cancel-button"
-                      onClick={() => setIsEditing(false)}
-                    >
-                      Cancel
+                      {changingPassword ? "Updating..." : "Change Password"}
                     </button>
                   </div>
-                </>
-              ) : (
-                <>
-                  <div className="profile-info">
-                    <div className="info-group">
-                      <span className="label">Name:</span>
-                      <span className="value">{user.fullName || "Not set"}</span>
-                    </div>
-
-                    <div className="info-group">
-                      <span className="label">Username:</span>
-                      <span className="value">@{user.username || "Not set"}</span>
-                    </div>
-
-                    <div className="info-group">
-                      <span className="label">Email:</span>
-                      <span className="value">{user.email || "Not set"}</span>
-                    </div>
-
-                    <div className="info-group">
-                      <span className="label">Phone:</span>
-                      <span className="value">{user.phoneNumber || "Not set"}</span>
-                    </div>
-
-                    {displaySkills.length > 0 && (
-                      <div className="info-group">
-                        <span className="label">Skills:</span>
-                        <div className="skills-display">
-                          {displaySkills.map((skill, idx) => (
-                            <span key={idx} className="skill-tag">
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {user.education && (
-                      <div className="info-group">
-                        <span className="label">Education:</span>
-                        <span className="value">{user.education}</span>
-                      </div>
-                    )}
-
-                    {user.profileSummary && (
-                      <div className="info-group">
-                        <span className="label">About:</span>
-                        <span className="value description">{user.profileSummary}</span>
-                      </div>
-                    )}
-
-                    {user.rating && (
-                      <div className="info-group">
-                        <span className="label">Rating:</span>
-                        <span className="value">
-                          {"⭐".repeat(Math.floor(user.rating))}
-                          {user.rating % 1 !== 0 && "✨"}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                </form>
+              </div>
             </div>
           </div>
         </div>

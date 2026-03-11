@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Navbar from "../components/Navbar"
-import { fetchApplicationsForJob, fetchJobs, logoutUser } from "../services/api"
+import {
+  fetchApplicationsForJob,
+  fetchMyPostedJobs,
+  logoutUser,
+  selectApplicantForJob,
+} from "../services/api"
 import "./MyJobs.css"
 
 const getJobId = (job) => job?._id || job?.id || ""
@@ -26,13 +31,6 @@ const normalizeSkills = (skills) => {
   return "Not specified"
 }
 
-const getOwnerId = (job) =>
-  job?.hirerId?._id ||
-  job?.hirerId ||
-  job?.createdBy?._id ||
-  job?.createdBy ||
-  ""
-
 const getApplicantId = (application) =>
   application?.applicantId?._id || application?.applicantId || application?._id || ""
 
@@ -43,14 +41,89 @@ const getApplicantName = (application) =>
   application?.username ||
   "Unknown Applicant"
 
+const getApplicantUsername = (application) =>
+  application?.applicantId?.username ? `@${application.applicantId.username}` : ""
+
+const getApplicantProfilePicture = (application) => application?.applicantId?.profilePicture || ""
+
+const getApplicantSkills = (application) => {
+  const skills = application?.applicantId?.skills
+
+  if (Array.isArray(skills)) {
+    return skills
+      .map((skill) => (typeof skill === "string" ? skill.trim() : ""))
+      .filter(Boolean)
+  }
+
+  return []
+}
+
+const formatAppliedDate = (application) => {
+  const value = application?.createdAt
+
+  if (!value) {
+    return "Date unavailable"
+  }
+
+  const parsedDate = new Date(value)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Date unavailable"
+  }
+
+  return parsedDate.toLocaleDateString()
+}
+
 function MyJobs() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
   const [applicantsByJob, setApplicantsByJob] = useState({})
   const [expandedJobId, setExpandedJobId] = useState("")
+  const [selectingApplicationId, setSelectingApplicationId] = useState("")
+
+  const loadMyJobs = useCallback(async () => {
+    setLoading(true)
+    setError("")
+
+    try {
+      const jobsResponse = await fetchMyPostedJobs()
+      const myJobs = Array.isArray(jobsResponse.data)
+        ? jobsResponse.data
+        : Array.isArray(jobsResponse.data?.data)
+          ? jobsResponse.data.data
+          : []
+      setJobs(myJobs)
+
+      const applicantsEntries = await Promise.all(
+        myJobs.map(async (job) => {
+          const jobId = getJobId(job)
+
+          try {
+            const response = await fetchApplicationsForJob(jobId)
+            const applications = Array.isArray(response.data)
+              ? response.data
+              : Array.isArray(response.data?.data)
+                ? response.data.data
+                : []
+            return [jobId, { items: applications, error: "" }]
+          } catch (applicationsError) {
+            console.error(`Failed to fetch applicants for job ${jobId}:`, applicationsError)
+            return [jobId, { items: [], error: "Failed to load applicants." }]
+          }
+        })
+      )
+
+      setApplicantsByJob(Object.fromEntries(applicantsEntries))
+    } catch (loadError) {
+      console.error("Failed to load your jobs:", loadError)
+      setError("Failed to load your jobs. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -61,10 +134,8 @@ function MyJobs() {
       return
     }
 
-    let parsedUser
     try {
-      parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
+      setUser(JSON.parse(userData))
     } catch (parseError) {
       console.error("Error parsing user data:", parseError)
       localStorage.removeItem("token")
@@ -73,52 +144,8 @@ function MyJobs() {
       return
     }
 
-    const loadMyJobs = async () => {
-      setLoading(true)
-      setError("")
-
-      try {
-        const jobsResponse = await fetchJobs()
-        const allJobs = Array.isArray(jobsResponse.data)
-          ? jobsResponse.data
-          : Array.isArray(jobsResponse.data?.data)
-            ? jobsResponse.data.data
-            : []
-
-        const userId = parsedUser?._id || parsedUser?.id || ""
-        const myJobs = allJobs.filter((job) => String(getOwnerId(job)) === String(userId))
-        setJobs(myJobs)
-
-        const applicantsEntries = await Promise.all(
-          myJobs.map(async (job) => {
-            const jobId = getJobId(job)
-
-            try {
-              const response = await fetchApplicationsForJob(jobId)
-              const applications = Array.isArray(response.data)
-                ? response.data
-                : Array.isArray(response.data?.data)
-                  ? response.data.data
-                  : []
-              return [jobId, { items: applications, error: "" }]
-            } catch (applicationsError) {
-              console.error(`Failed to fetch applicants for job ${jobId}:`, applicationsError)
-              return [jobId, { items: [], error: "Failed to load applicants." }]
-            }
-          })
-        )
-
-        setApplicantsByJob(Object.fromEntries(applicantsEntries))
-      } catch (loadError) {
-        console.error("Failed to load your jobs:", loadError)
-        setError("Failed to load your jobs. Please try again.")
-      } finally {
-        setLoading(false)
-      }
-    }
-
     loadMyJobs()
-  }, [navigate])
+  }, [loadMyJobs, navigate])
 
   const handleLogout = async () => {
     try {
@@ -135,6 +162,32 @@ function MyJobs() {
 
   const toggleApplicants = (jobId) => {
     setExpandedJobId((currentJobId) => (currentJobId === jobId ? "" : jobId))
+  }
+
+  const handleSelectApplicant = async (jobId, applicationId) => {
+    if (!jobId || !applicationId) {
+      setError("Unable to select applicant: missing job or application id.")
+      return
+    }
+
+    setSelectingApplicationId(applicationId)
+    setError("")
+    setMessage("")
+
+    try {
+      await selectApplicantForJob(jobId, applicationId)
+      setMessage("Applicant selected successfully.")
+      await loadMyJobs()
+      setExpandedJobId(jobId)
+    } catch (selectionError) {
+      console.error("Failed to select applicant:", selectionError)
+      setError(
+        selectionError?.response?.data?.message ||
+        "Failed to select applicant. Please try again."
+      )
+    } finally {
+      setSelectingApplicationId("")
+    }
   }
 
   if (loading) {
@@ -157,6 +210,7 @@ function MyJobs() {
             <p>All jobs posted by your account.</p>
           </div>
 
+          {message && <div className="my-jobs-success">{message}</div>}
           {error && <div className="my-jobs-error">{error}</div>}
 
           {!error && jobs.length === 0 && (
@@ -169,6 +223,7 @@ function MyJobs() {
               const applicantsState = applicantsByJob[jobId] || { items: [], error: "" }
               const applicants = applicantsState.items
               const isExpanded = expandedJobId === jobId
+              const isJobOpen = job?.status === "open"
 
               return (
                 <article className="my-job-card" key={jobId || job.title}>
@@ -207,19 +262,74 @@ function MyJobs() {
 
                       {!applicantsState.error && applicants.length > 0 && (
                         <div className="my-job-applicants-list">
-                          {applicants.map((application) => (
-                            <div
-                              className="my-job-applicant-item"
-                              key={application?._id || getApplicantId(application)}
-                            >
-                              <span className="my-job-applicant-name">
-                                {getApplicantName(application)}
-                              </span>
-                              <span className="my-job-applicant-amount">
-                                Proposed: {application?.amountProposed ?? "Not provided"}
-                              </span>
-                            </div>
-                          ))}
+                          {applicants.map((application) => {
+                            const applicationId = application?._id || getApplicantId(application)
+                            const isSelecting = selectingApplicationId === applicationId
+                            const applicantSkills = getApplicantSkills(application)
+
+                            return (
+                              <div
+                                className="my-job-applicant-item"
+                                key={applicationId}
+                              >
+                                <div className="my-job-applicant-summary">
+                                  <div className="my-job-applicant-header">
+                                    {getApplicantProfilePicture(application) ? (
+                                      <img
+                                        src={getApplicantProfilePicture(application)}
+                                        alt={getApplicantName(application)}
+                                        className="my-job-applicant-image"
+                                      />
+                                    ) : (
+                                      <div className="my-job-applicant-fallback">
+                                        {getApplicantName(application).charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+                                    <div className="my-job-applicant-meta">
+                                      <span className="my-job-applicant-name">
+                                        {getApplicantName(application)}
+                                      </span>
+                                      {getApplicantUsername(application) && (
+                                        <span className="my-job-applicant-username">
+                                          {getApplicantUsername(application)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <span className="my-job-applicant-amount">
+                                    Proposed: {application?.amountProposed ?? "Not provided"}
+                                  </span>
+                                  <span className="my-job-applicant-date">
+                                    Applied: {formatAppliedDate(application)}
+                                  </span>
+                                  {applicantSkills.length > 0 && (
+                                    <div className="my-job-applicant-skills">
+                                      {applicantSkills.map((skill, idx) => (
+                                        <span
+                                          className="my-job-applicant-skill"
+                                          key={`${skill}-${idx}`}
+                                        >
+                                          {skill}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                {isJobOpen ? (
+                                  <button
+                                    className="my-job-select-button"
+                                    type="button"
+                                    onClick={() => handleSelectApplicant(jobId, application?._id)}
+                                    disabled={isSelecting || !!selectingApplicationId}
+                                  >
+                                    {isSelecting ? "Selecting..." : "Select Applicant"}
+                                  </button>
+                                ) : (
+                                  <span className="my-job-matched-badge">Job Matched</span>
+                                )}
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </div>

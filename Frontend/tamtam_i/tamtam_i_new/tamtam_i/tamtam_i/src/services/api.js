@@ -44,8 +44,14 @@ API.interceptors.response.use(
 )
 
 export const loginUser = (data) => API.post("/api/v1/users/login", data)
-export const registerUser = (data) => API.post("/api/v1/users/register", data)
-export const fetchJobs = () => API.get("/api/v1/job/jobs")
+export const registerUser = (data) =>
+  API.post("/api/v1/users/register", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  })
+export const fetchJobs = () => API.get("/api/v1/job/active-jobs")
+export const fetchMyPostedJobs = () => API.get("/api/v1/job/my-posted-jobs")
 export const applyToJob = (jobId, data) =>
   API.post(`/api/v1/applications/job/${jobId}/apply`, data)
 
@@ -55,8 +61,17 @@ export const fetchMyApplications = () => API.get("/api/v1/applications/job/my-ap
 
 export const fetchActiveJobs = () => API.get("/api/v1/job/active-jobs")
 
+export const fetchCurrentUser = () => API.get("/api/v1/users/current-user")
+
+export const addUserSkill = (skill) => API.post("/api/v1/users/add-skill", { skill })
+
+export const changeUserPassword = (data) => API.post("/api/v1/users/change-password", data)
+
 export const fetchApplicationsForJob = (jobId) =>
   API.get(`/api/v1/applications/job/${jobId}/applications`)
+
+export const selectApplicantForJob = (jobId, applicationId) =>
+  API.post(`/api/v1/job/${jobId}/applications/${applicationId}/select`)
 
 export const logoutUser = async () => {
   const attempts = [

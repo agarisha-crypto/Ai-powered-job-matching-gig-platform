@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react"
 import "./ApplyJobModal.css"
 
+const getJobTitle = (job) => job?.jobId?.title || job?.title || "Job"
+
+const getJobBudget = (job) => job?.jobId?.budget ?? job?.budget ?? "Not specified"
+
+const getJobStatus = (job) => job?.jobId?.status || job?.status || "Unknown"
+
 function ApplyJobModal({ job, isSubmitting, onClose, onSubmit }) {
   const [amountProposed, setAmountProposed] = useState("")
   const [error, setError] = useState("")
 
   useEffect(() => {
-    setAmountProposed(job?.budget ? String(job.budget) : "")
+    const budget = getJobBudget(job)
+    setAmountProposed(typeof budget === "number" ? String(budget) : "")
     setError("")
   }, [job])
 
@@ -49,7 +56,7 @@ function ApplyJobModal({ job, isSubmitting, onClose, onSubmit }) {
       >
         <div className="apply-job-modal-header">
           <div>
-            <h2 id="apply-job-title">Apply for {job.title || "Job"}</h2>
+            <h2 id="apply-job-title">Apply for {getJobTitle(job)}</h2>
             <p>Submit your proposed amount for this job.</p>
           </div>
           <button
@@ -66,10 +73,10 @@ function ApplyJobModal({ job, isSubmitting, onClose, onSubmit }) {
         <form className="apply-job-form" onSubmit={handleSubmit}>
           <div className="apply-job-summary">
             <p>
-              <strong>Budget:</strong> {job.budget ?? "Not specified"}
+              <strong>Budget:</strong> {getJobBudget(job)}
             </p>
             <p>
-              <strong>Status:</strong> {job.status || "Unknown"}
+              <strong>Status:</strong> {getJobStatus(job)}
             </p>
           </div>
 

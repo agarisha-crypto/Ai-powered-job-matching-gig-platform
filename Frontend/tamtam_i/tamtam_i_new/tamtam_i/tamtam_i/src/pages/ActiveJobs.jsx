@@ -2,55 +2,43 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar"
 import Navbar from "../components/Navbar"
-import ApplyJobModal from "../components/ApplyJobModal"
-import { applyToJob, fetchActiveJobs, logoutUser } from "../services/api"
+import { fetchMyApplications, logoutUser } from "../services/api"
 import "./ActiveJobs.css"
 
+const ACTIVE_STATUSES = new Set(["open", "matched"])
 
-const getJobId = (job) => job?._id || job?.id || job?.jobId?._id || job?.jobId || ""
+const getJobId = (application) => application?.jobId?._id || application?.jobId || application?._id || ""
 
-  
-
-const getJobStatus = (job) =>
-  typeof (job?.jobId?.status || job?.status) === "string"
-    ? (job.jobId?.status || job.status).toLowerCase()
-    : "unknown"
-
-const canApplyToJob = (job) => getJobStatus(job) === "open"
+const getJobStatus = (application) => {
+  const status = application?.jobId?.status
+  return typeof status === "string" ? status.toLowerCase() : "unknown"
+}
 
 const formatStatusLabel = (status) => {
   if (!status || status === "unknown") {
     return "Unknown"
   }
 
-  return status
-    .split(/[\s-_]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ")
+  if (status === "done") {
+    return "Done"
+  }
+
+  return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
 const getStatusClassName = (status) =>
   `status-${(status || "unknown").replace(/[\s_]+/g, "-")}`
 
-const getJobTitle = (job) =>
-  job?.jobId?.title || job?.title || "Untitled Job"
+const getJobTitle = (application) => application?.jobId?.title || "Untitled Job"
 
-const getJobDescription = (job) =>
-  job?.jobId?.description || job?.description || "No description available."
+const getJobDescription = (application) =>
+  application?.jobId?.description || "No description available."
 
-const getJobBudget = (job) =>
-  job?.jobId?.budget ?? job?.budget ?? "Not specified"
+const getJobBudget = (application) =>
+  application?.jobId?.budget ?? "Not specified"
 
-const getRequiredSkills = (job) =>
-  job?.jobId?.requiredSkills || job?.requiredSkills || "Not specified"
-
-const getCreatedDate = (job) => {
-  const value =
-    job?.updatedAt ||
-    job?.createdAt ||
-    job?.jobId?.updatedAt ||
-    job?.jobId?.createdAt
+const getCreatedDate = (application) => {
+  const value = application?.jobId?.createdAt || application?.createdAt
 
   if (!value) {
     return "Date unavailable"
@@ -70,11 +58,6 @@ function ActiveJobs() {
   const [activeJobs, setActiveJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const [selectedJob, setSelectedJob] = useState(null)
-  const [applyingJobId, setApplyingJobId] = useState("")
-  const [applyMessage, setApplyMessage] = useState("")
-
- 
 
   useEffect(() => {
     const token = localStorage.getItem("token")
@@ -86,8 +69,7 @@ function ActiveJobs() {
     }
 
     try {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
+      setUser(JSON.parse(userData))
     } catch (parseError) {
       console.error("Error parsing user data:", parseError)
       localStorage.removeItem("token")
@@ -101,14 +83,18 @@ function ActiveJobs() {
       setError("")
 
       try {
-        const response = await fetchActiveJobs()
+        const response = await fetchMyApplications()
         const items = Array.isArray(response.data)
           ? response.data
           : Array.isArray(response.data?.data)
             ? response.data.data
             : []
 
-        setActiveJobs(items)
+        const activeApplications = items.filter((application) =>
+          ACTIVE_STATUSES.has(getJobStatus(application))
+        )
+
+        setActiveJobs(activeApplications)
       } catch (loadError) {
         console.error("Failed to fetch active jobs:", loadError)
         setError("Failed to load active jobs. Please try again.")
@@ -133,33 +119,6 @@ function ActiveJobs() {
     navigate("/")
   }
 
-  const handleApply = async (formData) => {
-    const job = selectedJob
-    const jobId = getJobId(job)
-
-    if (!jobId) {
-      setApplyMessage("Unable to apply: missing job id.")
-      return
-    }
-
-    setApplyingJobId(jobId)
-    setApplyMessage("")
-
-    try {
-      await applyToJob(jobId, formData)
-      setApplyMessage("Application submitted successfully.")
-      setSelectedJob(null)
-    } catch (applyError) {
-      console.error("Failed to apply for job:", applyError)
-      setApplyMessage(
-        applyError?.response?.data?.message ||
-        "Failed to apply for this job. Please try again."
-      )
-    } finally {
-      setApplyingJobId("")
-    }
-  }
-
   if (loading) {
     return (
       <div className="active-jobs-loading">
@@ -177,73 +136,54 @@ function ActiveJobs() {
         <div className="active-jobs-content">
           <div className="active-jobs-header">
             <h1>Active Jobs</h1>
-            <p>Jobs from your applications that are still active.</p>
+            <p>Jobs you have already applied to that are still open or matched.</p>
           </div>
 
           {error && <div className="active-jobs-error">{error}</div>}
-          {applyMessage && <div className="active-jobs-message">{applyMessage}</div>}
 
           {!error && activeJobs.length === 0 && (
             <div className="active-jobs-empty">No active jobs found.</div>
           )}
 
           <div className="active-jobs-grid">
-            {activeJobs.map((job) => {
-              const jobId = getJobId(job)
-              const jobStatus = getJobStatus(job)
-              const isApplying = applyingJobId === jobId
-              const canApply = canApplyToJob(job)
+            {activeJobs.map((application) => {
+              const jobId = getJobId(application)
+              const jobStatus = getJobStatus(application)
 
               return (
                 <article
                   className="active-job-card"
-                  key={jobId || `${getJobTitle(job)}-${jobStatus}`}
+                  key={jobId || application?._id || `${getJobTitle(application)}-${jobStatus}`}
                 >
                   <div className="active-job-card-header">
-                    <h2 className="active-job-title">{getJobTitle(job)}</h2>
+                    <h2 className="active-job-title">{getJobTitle(application)}</h2>
                     <span className={`active-job-status ${getStatusClassName(jobStatus)}`}>
                       {formatStatusLabel(jobStatus)}
                     </span>
                   </div>
 
-                  <p className="active-job-description">{getJobDescription(job)}</p>
+                  <p className="active-job-description">{getJobDescription(application)}</p>
 
                   <div className="active-job-meta">
                     <p>
                       <strong>Job Status:</strong> {formatStatusLabel(jobStatus)}
                     </p>
                     <p>
-                      <strong>Budget:</strong> {getJobBudget(job)}
+                      <strong>Budget:</strong> {getJobBudget(application)}
                     </p>
                     <p>
-                      <strong>Required Skills:</strong> {getRequiredSkills(job)}
+                      <strong>Your Proposed Amount:</strong> {application?.amountProposed ?? "Not provided"}
                     </p>
                     <p>
-                      <strong>Created On:</strong> {getCreatedDate(job)}
+                      <strong>Applied On:</strong> {getCreatedDate(application)}
                     </p>
                   </div>
-
-                  <button
-                    className="active-job-apply-button"
-                    type="button"
-                    onClick={() => setSelectedJob(job)}
-                    disabled={isApplying || !canApply}
-                  >
-                    {isApplying ? "Applying..." : canApply ? "Apply" : "Unavailable"}
-                  </button>
                 </article>
               )
             })}
           </div>
         </div>
       </div>
-
-      <ApplyJobModal
-        job={selectedJob}
-        isSubmitting={applyingJobId === getJobId(selectedJob)}
-        onClose={() => setSelectedJob(null)}
-        onSubmit={handleApply}
-      />
     </div>
   )
 }

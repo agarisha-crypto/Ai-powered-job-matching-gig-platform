@@ -56,6 +56,49 @@
   line-height: 1.4;
 }
 
+.job-hirer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.job-hirer-image,
+.job-hirer-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.job-hirer-image {
+  object-fit: cover;
+}
+
+.job-hirer-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  color: #fff;
+  font-weight: 700;
+}
+
+.job-hirer-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.job-hirer-name {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.job-hirer-username {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
 .job-budget {
   margin: 0;
   color: #333;

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../services/api";
 import "./Register.css";
 
 function Register() {
@@ -35,23 +35,11 @@ function Register() {
 
       console.log("Sending registration data");
 
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/users/register",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const res = await registerUser(formData);
 
       console.log("Register success:", res.data);
 
-      if (res.data?.data) {
-        localStorage.setItem("user", JSON.stringify(res.data.data));
-      }
-
-      navigate("/dashboard");
+      navigate("/login");
     } catch (err) {
       console.error("Registration error:", err);
 
