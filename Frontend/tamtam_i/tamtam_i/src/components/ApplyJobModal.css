@@ -1,0 +1,131 @@
+.apply-job-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.apply-job-modal {
+  width: min(100%, 460px);
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+  padding: 24px;
+}
+
+.apply-job-modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.apply-job-modal-header h2 {
+  margin: 0 0 6px;
+  color: #0f172a;
+}
+
+.apply-job-modal-header p {
+  margin: 0;
+  color: #475569;
+}
+
+.apply-job-close {
+  border: none;
+  background: #e2e8f0;
+  color: #0f172a;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.apply-job-form {
+  display: grid;
+  gap: 14px;
+}
+
+.apply-job-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.apply-job-summary p {
+  margin: 0 0 8px;
+  color: #334155;
+}
+
+.apply-job-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.apply-job-label {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.apply-job-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 1rem;
+}
+
+.apply-job-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.apply-job-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.apply-job-secondary,
+.apply-job-primary {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.apply-job-secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.apply-job-primary {
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  color: #ffffff;
+}
+
+.apply-job-secondary:disabled,
+.apply-job-primary:disabled,
+.apply-job-close:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .apply-job-modal {
+    padding: 18px;
+  }
+
+  .apply-job-actions {
+    flex-direction: column-reverse;
+  }
+}
